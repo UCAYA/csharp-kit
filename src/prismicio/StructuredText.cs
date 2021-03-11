@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Web;
+using System.Diagnostics;
 
 namespace prismic
 {
@@ -222,97 +223,135 @@ namespace prismic
 				}
 			}
 
-			public String AsHtml(IList<Block> blocks, DocumentLinkResolver linkResolver, HtmlSerializer htmlSerializer) {
+			public String AsHtml(IList<Block> blocks, DocumentLinkResolver linkResolver, HtmlSerializer htmlSerializer)
+			{
 				IList<BlockGroup> blockGroups = new List<BlockGroup>();
-				foreach(Block block in blocks) {
+
+				foreach(Block block in blocks)
+				{
 					BlockGroup lastOne = blockGroups.Count == 0 ? null : blockGroups[blockGroups.Count - 1];
-					if(lastOne != null && "ul" == lastOne.tag && block is ListItem && !((ListItem)block).IsOrdered) {
+
+					if(lastOne != null && "ul" == lastOne.tag && block is ListItem && !((ListItem)block).IsOrdered)
+					{
 						lastOne.blocks.Add(block);
 					}
-					else if(lastOne != null && "ol" == lastOne.tag && block is ListItem && ((ListItem)block).IsOrdered) {
+					else if(lastOne != null && "ol" == lastOne.tag && block is ListItem && ((ListItem)block).IsOrdered)
+					{
 						lastOne.blocks.Add(block);
 					}
-					else if(block is ListItem && !((ListItem)block).IsOrdered) {
+					else if(block is ListItem && !((ListItem)block).IsOrdered)
+					{
 						BlockGroup newBlockGroup = new BlockGroup("ul", new List<Block>());
 						newBlockGroup.blocks.Add(block);
 						blockGroups.Add(newBlockGroup);
 					}
-					else if(block is ListItem && ((ListItem)block).IsOrdered) {
+					else if(block is ListItem && ((ListItem)block).IsOrdered)
+					{
 						BlockGroup newBlockGroup = new BlockGroup("ol", new List<Block>());
 						newBlockGroup.blocks.Add(block);
 						blockGroups.Add(newBlockGroup);
 					}
-					else {
+					else
+					{
 						BlockGroup newBlockGroup = new BlockGroup(null, new List<Block>());
 						newBlockGroup.blocks.Add(block);
 						blockGroups.Add(newBlockGroup);
 					}
 				}
+
 				var html = "";
+
 				foreach(BlockGroup blockGroup in blockGroups) {
-					if(blockGroup.tag != null) {
+
+					if (blockGroup.tag != null)
+					{
 						html += ("<" + blockGroup.tag + ">");
-						foreach(Block block in blockGroup.blocks) {
+
+						foreach (Block block in blockGroup.blocks)
+						{
 							html += (asHtml(block, linkResolver, htmlSerializer));
 						}
+
 						html += ("</" + blockGroup.tag + ">");
-					} else {
-						foreach(Block block in blockGroup.blocks) {
+					}
+					else
+					{
+						foreach (Block block in blockGroup.blocks)
+						{
 							html += (asHtml(block, linkResolver, htmlSerializer));
 						}
 					}
 				}
+				
 				return html;
 			}
 
-			public String asHtml(Block block, DocumentLinkResolver linkResolver, HtmlSerializer htmlSerializer) {
+			public String asHtml(Block block, DocumentLinkResolver linkResolver, HtmlSerializer htmlSerializer)
+			{
 				String content = "";
-				if(block is StructuredText.Heading) {
+
+				if (block is StructuredText.Heading)
+				{
 					StructuredText.Heading heading = (StructuredText.Heading)block;
 					content = insertSpans(heading.Text, heading.Spans, linkResolver, htmlSerializer);
 				}
-				else if(block is StructuredText.Paragraph) {
+				else if (block is StructuredText.Paragraph)
+				{
 					StructuredText.Paragraph paragraph = (StructuredText.Paragraph)block;
 					content = insertSpans(paragraph.Text, paragraph.Spans, linkResolver, htmlSerializer);
 				}
-				else if(block is StructuredText.Preformatted) {
+				else if (block is StructuredText.Preformatted)
+				{
 					StructuredText.Preformatted paragraph = (StructuredText.Preformatted)block;
 					content = insertSpans(paragraph.Text, paragraph.Spans, linkResolver, htmlSerializer);
 				}
-				else if(block is StructuredText.ListItem) {
+				else if (block is StructuredText.ListItem)
+				{
 					StructuredText.ListItem listItem = (StructuredText.ListItem)block;
 					content = insertSpans(listItem.Text, listItem.Spans, linkResolver, htmlSerializer);
 				}
 
-				if (htmlSerializer != null) {
+				if (htmlSerializer != null)
+				{
 					String customHtml = htmlSerializer.Serialize(block, content);
-					if (customHtml != null) {
+
+					if (customHtml != null)
+					{
 						return customHtml;
 					}
 				}
+
 				String classCode = block.Label == null ? "" : (" class=\"" + block.Label + "\"");
-				if(block is StructuredText.Heading) {
+
+				if (block is StructuredText.Heading)
+				{
 					StructuredText.Heading heading = (StructuredText.Heading)block;
 					return ("<h" + heading.Level + classCode + ">" + content + "</h" + heading.Level + ">");
 				}
-				else if(block is StructuredText.Paragraph) {
+				else if (block is StructuredText.Paragraph)
+				{
 					return ("<p" + classCode + ">" + content + "</p>");
 				}
-				else if(block is StructuredText.Preformatted) {
+				else if (block is StructuredText.Preformatted)
+				{
 					return ("<pre" + classCode + ">" + content + "</pre>");
 				}
-				else if(block is StructuredText.ListItem) {
+				else if (block is StructuredText.ListItem)
+				{
 					return ("<li" + classCode + ">" + content + "</li>");
 				}
-				else if(block is StructuredText.Image) {
+				else if (block is StructuredText.Image)
+				{
 					StructuredText.Image image = (StructuredText.Image)block;
 					String labelCode = block.Label == null ? "" : (" " + block.Label);
 					return ("<p class=\"block-img" + labelCode + "\">" + image.View.AsHtml(linkResolver) + "</p>");
 				}
-				else if(block is StructuredText.Embed) {
+				else if (block is StructuredText.Embed)
+				{
 					StructuredText.Embed embed = (StructuredText.Embed)block;
 					return (embed.Obj.AsHtml());
 				}
+
 				return "";
 			}
 
@@ -426,11 +465,13 @@ namespace prismic
 				return html;
 			}
 
-			public String AsHtml(DocumentLinkResolver linkResolver) {
+			public String AsHtml(DocumentLinkResolver linkResolver)
+			{
 				return AsHtml(linkResolver, null);
 			}
 
-			public String AsHtml(DocumentLinkResolver linkResolver, HtmlSerializer htmlSerializer) {
+			public String AsHtml(DocumentLinkResolver linkResolver, HtmlSerializer htmlSerializer)
+			{
 				return AsHtml(getBlocks(), linkResolver, htmlSerializer);
 			}
 
@@ -552,6 +593,234 @@ namespace prismic
 			}
 
 
+			public string AsMarkdown(DocumentLinkResolver linkResolver = null)
+			{
+				IList<Block> blocks = getBlocks();
+
+				IEnumerable<string> richTextContent = blocks.Select(block => ConvertRichTextBlockToMarkdown(block, linkResolver));
+
+				return String.Join("\n\n", richTextContent);
+			}
+
+			private string ConvertRichTextBlockToMarkdown(Block block, DocumentLinkResolver linkResolver)
+			{
+				string convertedText = null;
+
+				if (block is StructuredText.Heading)
+				{
+					StructuredText.Heading heading = (StructuredText.Heading)block;
+					convertedText = ConvertToMarkdownString(heading.Text, heading.Spans, linkResolver);
+					string result = new String('#', heading.Level);
+					return $"{result} {convertedText}";
+				}
+				else if (block is StructuredText.Preformatted)
+				{
+					StructuredText.Preformatted paragraph = (StructuredText.Preformatted)block;
+					return $"```\n{paragraph.Text}\n```";
+				}
+				else if (block is StructuredText.ListItem)
+				{
+					StructuredText.ListItem listItem = (StructuredText.ListItem)block;
+					convertedText = ConvertToMarkdownString(listItem.Text, listItem.Spans, linkResolver);
+					return listItem.IsOrdered ? $"1. {convertedText}" : $"- {convertedText}";
+				}
+				else if (block is StructuredText.Image)
+				{
+					StructuredText.Image image = (StructuredText.Image) block;
+					string alt = !String.IsNullOrEmpty(image.View.Alt) ? image.View.Alt : "";
+					return $"![{alt}]({image.Url})";
+				}
+				else
+                {
+					if (!(block is StructuredText.Paragraph))
+					{
+						Console.WriteLine($"`Text type is unknown. Returning text as a paragragh");
+					}
+
+					StructuredText.Paragraph paragraph = (StructuredText.Paragraph)block;
+					convertedText = ConvertToMarkdownString(paragraph.Text, paragraph.Spans, linkResolver);
+
+					if (String.IsNullOrEmpty(convertedText))
+					{
+						return "&nbsp;";
+					}
+
+					return convertedText;
+				}
+			}
+
+			private string ConvertToMarkdownString(string text, IList<Span> spans, DocumentLinkResolver linkResolver = null)
+			{
+				if (String.IsNullOrEmpty(text))
+                {
+					return null;
+                }
+
+				var convertedSpans = ConvertSpansToMarkdownSpans(spans, linkResolver);
+
+				return convertedSpans.Aggregate(text, (acc, convertedSpan) =>
+				{
+					string tag = "";
+
+					if (convertedSpan.Type == "strong")
+					{
+						tag = "**";
+					}
+
+					if (convertedSpan.Type == "em")
+					{
+						tag = "*";
+					}
+
+					if (convertedSpan.Type == "hyperlink")
+					{
+						if (convertedSpan.Index == convertedSpan.Data.Start)
+						{
+							tag = "[";
+						}
+						else
+						{
+							tag = $"]({convertedSpan.Data.Url})";
+						}
+					}
+
+					return InsertMarkdown(tag, convertedSpan.Index, acc);
+				});
+			}
+
+			private string InsertMarkdown(string value, int index, string str)
+			{
+				return str.Substring(0, index) + value + str.Substring(index);
+			}
+
+			private IEnumerable<MarkdownSpan> ConvertSpansToMarkdownSpans(IList<Span> spans, DocumentLinkResolver linkResolver = null)
+			{
+				if (spans == null)
+				{
+					return null;
+				}
+
+				List<MarkdownSpan> convertedSpans = new List<MarkdownSpan>();
+
+				convertedSpans = spans.Aggregate(convertedSpans, (acc, span) => {
+
+					if (!(span is Strong) && !(span is Em) && !(span is Hyperlink))
+					{
+						Debug.WriteLine($"Span type is unknown.Returning text as a paragragh");
+						return acc;
+					}
+
+					if (span is Hyperlink)
+					{
+						Hyperlink hyperlink = (Hyperlink)span;
+						if (!(hyperlink.Link is WebLink) && !(hyperlink.Link is FileLink) && !(hyperlink.Link is ImageLink) && !(hyperlink.Link is DocumentLink))
+						{
+							Debug.WriteLine($"Link type is unknown.Returning texting as paragraph.");
+							return acc;
+						}
+
+						if (hyperlink.Link is DocumentLink)
+						{
+							if (linkResolver == null)
+							{
+								Debug.WriteLine("Unable to resolve a document link as no link resolver method was passed in.");
+								return acc;
+							}
+						}
+					}
+
+					int putIndex = acc != null ? acc.Count / 2 : 0;
+					string url = GetUrlFromHyperlinkSpan(span, linkResolver);
+					string spanType = span.GetType().Name.ToLower();
+
+					acc.Insert(putIndex, new MarkdownSpan(span.Start, spanType, new MarkdownData(span.Start, span.End, spanType, url)));
+					acc.Insert(putIndex, new MarkdownSpan(span.End, spanType, new MarkdownData(span.Start, span.End, spanType, url)));
+
+					return acc;
+				});
+
+				return convertedSpans.OrderByDescending(cs => cs.Index);
+			}
+
+			private string GetUrlFromHyperlinkSpan(Span span, DocumentLinkResolver linkResolver)
+			{
+				if (span == null || !(span is Hyperlink))
+				{
+					return null;
+				}
+
+				Hyperlink hyperlink = (Hyperlink)span;
+
+				if (hyperlink.Link is WebLink)
+				{
+					return ((WebLink)hyperlink.Link).Url;
+				}
+				else if (hyperlink.Link is ImageLink)
+				{
+					return ((ImageLink)hyperlink.Link).Url;
+				}
+				else if (hyperlink.Link is FileLink)
+				{
+					return ((FileLink)hyperlink.Link).Url;
+				}
+				else if (hyperlink.Link is DocumentLink)
+				{
+					return linkResolver.Resolve((DocumentLink)hyperlink.Link);
+				}
+
+				return null;
+			}
+		}
+
+        internal class MarkdownSpan
+        {
+			#region Public Properties
+
+			public int Index;
+
+			public string Type;
+
+			public MarkdownData Data;
+
+			#endregion Public Properties
+
+			#region Public Constructor
+
+			public MarkdownSpan(int index, string type, MarkdownData data)
+			{
+				Index = index;
+				Type = type;
+				Data = data;
+			}
+
+			#endregion Public Constructor
+		}
+
+        public class MarkdownData
+        {
+			#region Public Properties
+
+			public int Start;
+
+			public int End;
+
+			public string Type;
+
+			public string Url;
+
+			#endregion Public Properties
+
+			#region Public Constructor
+
+			public MarkdownData(int start, int end, string type, string url)
+			{
+				Start = start;
+				End = end;
+				Type = type;
+				Url = url;
+			}
+
+			#endregion Public Constructor
 		}
 	}
 
