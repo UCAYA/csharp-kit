@@ -43,3 +43,4 @@ src/nuget/packaging/
 node_modules/
 
 /src/.vs/csharp-kit/DesignTimeBuild
+/src/.vs/csharp-kit/v16/TestStore

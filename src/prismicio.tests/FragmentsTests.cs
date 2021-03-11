@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
+using prismic.fragments;
 
 namespace prismic.tests
 {
@@ -50,6 +51,37 @@ namespace prismic.tests
 			var html = group.AsHtml(resolver);
 			Assert.IsNotNull (html);
 			Assert.AreEqual(@"<section data-field=""linktodoc""><a href=""http://localhost/doc/UrDejAEAAFwMyrW9"">installing-meta-micro</a></section><section data-field=""desc""><p>Just testing another field in a group section.</p></section><section data-field=""linktodoc""><a href=""http://localhost/doc/UrDmKgEAALwMyrXA"">using-meta-micro</a></section>", html);
+		}
+
+		[Test()]
+		public async Task ShouldParseStructuredTextToMarkdown()
+		{
+			var url = "https://micro.prismic.io/api";
+			Api api = await prismic.Api.Get(url);
+			LambdaDocumentLinkResolver documentLinkResolver = new LambdaDocumentLinkResolver(linkResolver);
+			Document document = await api.GetByID("WHx-gSYAAMkyXYX_");
+
+			var structuredText = document.GetStructuredText("all.stext");
+
+			Assert.IsNotNull(structuredText, "structuredText was not found");
+
+			string markdown = structuredText.AsMarkdown(documentLinkResolver);
+			Assert.IsNotNull(markdown);
+			Assert.AreEqual("normal **b** *i* ***bi*** [linkweb](http://prismic.io) [linkdoc](/doc/V_OplCUAACQAE0lA) [linkmedia](https://images.prismic.io/micro%2Fe7bbb553-a7b5-4e5c-bde7-8bd48a7200db_thermometer.png?auto=compress,format)\n\n```\npreformatted\n```\n\n# h1\n\n## h2\n\n### h3\n\n#### h4\n\n##### h5\n\n###### h6", markdown);
+		}
+
+		private string linkResolver(DocumentLink documentLink)
+		{
+			if (documentLink.Type == "blog_post")
+			{
+				return "/post/" + documentLink.Uid;
+			}
+			else if (documentLink.Type == "page")
+			{
+				return "/" + documentLink.Uid;
+			}
+
+			return "/doc/" + documentLink.Id;
 		}
 
 		[Test ()]
