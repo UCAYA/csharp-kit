@@ -6,6 +6,19 @@
 
 ### Getting started
 
+#### Kit compatibility
+
+This csharp-kit is **only compatible with API Prismic V1**
+* instantiate with this endpoint
+``` ocaml
+    var api = await Api.Get("https://your-repo.cdn.prismic.io/api");
+```
+* and not with this one
+``` ocaml
+    var api = await Api.Get("https://your-repo.cdn.prismic.io/api/v2");
+```
+Don't worry, [we have no plans to ever turn off V1 of the API](https://community.prismic.io/t/are-there-any-plans-to-make-the-dotnet-client-use-v2-of-the-api/3835/3) !
+
 #### Install the kit for your project
 
 This kit can be installed using NuGet [prismic package](https://www.nuget.org/packages/prismicio/).
