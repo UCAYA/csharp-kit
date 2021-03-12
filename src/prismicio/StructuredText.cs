@@ -597,9 +597,13 @@ namespace prismic
 			{
 				IList<Block> blocks = getBlocks();
 
-				IEnumerable<string> richTextContent = blocks.Select(block => ConvertRichTextBlockToMarkdown(block, linkResolver));
+				if (blocks != null)
+                {
+					IEnumerable<string> richTextContent = blocks.Select(block => ConvertRichTextBlockToMarkdown(block, linkResolver));
+					return String.Join("\n\n", richTextContent);
+				}
 
-				return String.Join("\n\n", richTextContent);
+				return null;
 			}
 
 			private string ConvertRichTextBlockToMarkdown(Block block, DocumentLinkResolver linkResolver)
