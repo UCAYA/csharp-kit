@@ -1,0 +1,1 @@
+nuget pack "prismicio/prismicio.csproj" -Properties Configuration=release

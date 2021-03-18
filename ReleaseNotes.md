@@ -65,3 +65,6 @@
 * Re-publish package
 #### New in 1.5.0 (Release 2019/09/02)
 * Fix OEmbed serialization
+
+#### New in 1.5.1 (Release 2021/03/15)
+* Add AsMarkdown extension method for StructuredText class
