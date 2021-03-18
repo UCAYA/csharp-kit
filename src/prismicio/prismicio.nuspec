@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ucaya-prismicio</id>
+    <version>1.5.1</version>
+    <title>ucaya-prismicio</title>
+    <authors>UCAYA</authors>
+    <owners>UCAYA</owners>
+    <licenseUrl>https://github.com/UCAYA/csharp-kit#licence</licenseUrl>
+    <projectUrl>https://github.com/UCAYA/csharp-kit</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Prismic.io extended development Kit for C#</description>
+    <releaseNotes>Add markdown support for StructuredText.</releaseNotes>
+    <copyright>Copyright UCAYA 2021</copyright>
+    <tags>Prismic</tags>
+  </metadata>
+</package>
