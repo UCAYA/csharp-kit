@@ -593,7 +593,7 @@ namespace prismic
 			}
 
 
-			public string AsMarkdown(DocumentLinkResolver linkResolver = null)
+			public string AsMarkdown(DocumentLinkResolver linkResolver = linkResolver)
 			{
 				IList<Block> blocks = getBlocks();
 
@@ -604,6 +604,20 @@ namespace prismic
 				}
 
 				return null;
+			}
+
+			private string linkResolver(DocumentLink documentLink)
+			{
+				if (documentLink.Type == "blog_post")
+				{
+					return "/post/" + documentLink.Uid;
+				}
+				else if (documentLink.Type == "page")
+				{
+					return "/" + documentLink.Uid;
+				}
+
+				return "/doc/" + documentLink.Id;
 			}
 
 			private string ConvertRichTextBlockToMarkdown(Block block, DocumentLinkResolver linkResolver)
